@@ -1,0 +1,27 @@
+name: Repack app with artifact management
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  repack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Repack app with artifact management
+        uses: expo/actions/repack-app-artifact@main
+        with:
+          platform: android
+          fingerprint-diff: ${{ steps.fingerprint.outputs.fingerprint-diff }}
+          current-git-commit: ${{ steps.fingerprint.outputs.current-git-commit }}
+          current-fingerprint: ${{ steps.fingerprint.outputs.current-fingerprint }}
+          build-command: |
+            npx expo prebuild -p android
+            cd android
+            ./gradlew :app:assembleRelease
+          build-output: android/app/build/outputs/apk/release/app-release.apk
+          artifact-name: android-build
